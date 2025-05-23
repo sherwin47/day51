@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - Sherwin's Corner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-4xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">🧾 Checkout</h1>
+
+    <!-- Contact Info -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
+      <input class="w-full p-2 border mb-3" type="text" placeholder="Full Name">
+      <input class="w-full p-2 border mb-3" type="email" placeholder="Email">
+      <input class="w-full p-2 border" type="tel" placeholder="Phone Number">
+    </div>
+
+    <!-- Shipping Info -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Shipping Address</h2>
+      <input class="w-full p-2 border mb-3" type="text" placeholder="Address Line 1">
+      <input class="w-full p-2 border mb-3" type="text" placeholder="Address Line 2">
+      <div class="grid grid-cols-2 gap-4">
+        <input class="p-2 border mb-3" type="text" placeholder="City">
+        <input class="p-2 border mb-3" type="text" placeholder="State">
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <input class="p-2 border mb-3" type="text" placeholder="ZIP Code">
+        <input class="p-2 border mb-3" type="text" placeholder="Country">
+      </div>
+    </div>
+
+    <!-- Delivery Method -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Delivery Method</h2>
+      <label class="block mb-2">
+        <input type="radio" name="shipping" class="mr-2"> Standard (Free, 5-7 days)
+      </label>
+      <label class="block">
+        <input type="radio" name="shipping" class="mr-2"> Express (+₹100, 2-3 days)
+      </label>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
+      <label class="block mb-2">
+        <input type="radio" name="payment" class="mr-2"> Credit/Debit Card
+      </label>
+      <label class="block mb-2">
+        <input type="radio" name="payment" class="mr-2"> UPI
+      </label>
+      <label class="block">
+        <input type="radio" name="payment" class="mr-2"> Cash on Delivery
+      </label>
+    </div>
+
+    <!-- Summary and Place Order -->
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+      <p>Subtotal: ₹<span id="subtotal">XXXX</span></p>
+      <p>Shipping: ₹<span id="shipping">100</span></p>
+      <p class="font-bold text-lg">Total: ₹<span id="total">XXXX</span></p>
+      <a href="confirmation.html">
+        <button class="mt-4 w-full bg-green-600 text-white py-2 rounded">✅ Place Order</button>
+      </a>
+    </div>
+  </div>
+   <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const subtotalEl = document.getElementById("subtotal");
+        const shippingEl = document.getElementById("shipping");
+        const totalEl = document.getElementById("total");
+
+        // Calculate subtotal
+        let subtotal = 0;
+        cart.forEach(item => {
+            subtotal += item.price * item.quantity;
+        });
+        subtotalEl.textContent = subtotal;
+        shippingEl.textContent = "0"; // default to standard shipping
+        totalEl.textContent = subtotal;
+
+        // Handle shipping changes
+        const shippingRadios = document.querySelectorAll("input[name='shipping']");
+        shippingRadios.forEach(radio => {
+            radio.addEventListener("change", () => {
+            const shippingCost = radio.nextSibling.textContent.includes("Express") ? 100 : 0;
+            shippingEl.textContent = shippingCost;
+            totalEl.textContent = subtotal + shippingCost;
+            });
+        });
+
+        // Place order logic
+        const placeOrderBtn = document.querySelector("button");
+        placeOrderBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            // Get selected shipping
+            const shipping = document.querySelector("input[name='shipping']:checked");
+            const shippingMethod = shipping ? shipping.nextSibling.textContent.trim() : "Standard";
+
+            // Get selected payment
+            const payment = document.querySelector("input[name='payment']:checked");
+            const paymentMethod = payment ? payment.nextSibling.textContent.trim() : "Not selected";
+
+            // Final shipping cost and total
+            const shippingCost = shippingMethod.includes("Express") ? 100 : 0;
+            const total = subtotal + shippingCost;
+
+            // Save order data to localStorage
+            const order = {
+            orderId: "SHW" + Math.floor(Math.random() * 1000000), // simple ID
+            items: cart,
+            subtotal,
+            shipping: shippingCost,
+            total,
+            shippingMethod,
+            paymentMethod
+            };
+            localStorage.setItem("order", JSON.stringify(order));
+
+            // Clear cart
+            localStorage.removeItem("cart");
+
+            // Redirect
+            window.location.href = "confirmation.html";
+        });
+        });
+    </script>
+</body>
+</html>
